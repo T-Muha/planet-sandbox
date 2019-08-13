@@ -20,42 +20,30 @@ pauseButton = pyglet.sprite.Sprite(img=resources.pauseImage, x=0, y=0, batch=mai
 paused = False
 pauseButton.scale = 0.5
 
+sizeMenu = pyglet.sprite.Sprite(img=resources.sizeImage, x = 120, y = 0, batch=mainBatch)
+showSizeMenu = False
+sizeMenu.scale = 1.441
+
 su = 1.989*10**30
 au = 14959787070
 heavenlyBodies = []
+selector = 'planet'
 
-#planetOne = planet.Planet(img=resources.bluePlanetImage, x=400, y=400, batch=mainBatch, mass=0.000954588*su, vyi=-20)
-#planetTwo = planet.Planet(img=resources.bluePlanetImage, x=900, y=500, batch=mainBatch, mass=0.000954588*su, vyi=-20)
-#planetThree = planet.Planet(img=resources.bluePlanetImage, x=1100, y=300, batch=mainBatch, mass=0.000954588*su, vyi=20)
+#for i in range(50):
+#    newPlanet = planet.Planet(img=resources.bluePlanetImage, x=random.randrange(1280), y=random.randrange(720), batch=mainBatch, mass=.989, vxi=random.randrange(-10,10), vyi=random.randrange(-10,10))
+#    heavenlyBodies.append(newPlanet)
+#    newPlanet.scale = 0.1
 
-#holeOne = black_hole.BlackHole(img=resources.blackHoleImage, x=640, y=360, batch=mainBatch, mass=4.0*su)
-#holeOne.scale = 0.1
-#heavenlyBodies.append(holeOne)
-
-for i in range(50):
-    newPlanet = planet.Planet(img=resources.bluePlanetImage, x=random.randrange(1280), y=random.randrange(720), batch=mainBatch, mass=.989, vxi=random.randrange(-10,10), vyi=random.randrange(-10,10))
-    heavenlyBodies.append(newPlanet)
-    newPlanet.scale = 0.1
-
-
-##sun = planet.Planet(img=resources.bluePlanetImage, x=640, y=360, batch=mainBatch, mass=su)
-##earth = planet.Planet(img=resources.bluePlanetImage, x=800, y=360, batch=mainBatch, mass=0.000003003*su, vyi=30000 / au * 160 * 3.12) # * 3.12 arises from error. Need to find source
-##heavenlyBodies.append(sun)
-##heavenlyBodies.append(earth)
-##sun.scale = 0.5
-##earth.scale = 0.5
-
-#orbitSample = pyglet.sprite.Sprite(img=resources.orbitSampleImage, x=640, y=360, batch=mainBatch)
-#orbitSample.scale = 10
-
+sun = planet.Planet(img=resources.starImage, x=640, y=360, batch=mainBatch, mass=su)
+earth = planet.Planet(img=resources.planetImage, x=800, y=360, batch=mainBatch, mass=0.000003003*su, vyi=30000 / au * 160 * 3.12) # * 3.12 arises from error
+heavenlyBodies.append(sun)
+heavenlyBodies.append(earth)
 
 def update(dt):
     global au, paused
     if not paused:
         for index, heavenlyBody in enumerate(heavenlyBodies):
             for i in range(index+1,len(heavenlyBodies)):
-                #print(index)
-                #print(i)
                 secondBody = heavenlyBodies[i]
                 oneTwoX = (secondBody.x-heavenlyBody.x)
                 oneTwoY = (secondBody.y-heavenlyBody.y)
@@ -63,11 +51,8 @@ def update(dt):
                 fgPrime = 6.67408*10**-11 / au**3 * 160**3 * heavenlyBody.mass * secondBody.mass / distance**3
                 fgx = fgPrime * oneTwoX
                 fgy = fgPrime * oneTwoY
-                #print(fgy)
                 heavenlyBody.update_force(fgx, fgy)
                 secondBody.update_force(-1*fgx, -1*fgy)
-
-        #print('')
 
         for heavenlyBody in heavenlyBodies:
             heavenlyBody.update(dt)
@@ -82,24 +67,41 @@ pyglet.clock.schedule_interval(update, 1/60.0)
 @MainWindow.event
 def on_mouse_press(x, y, button, modifiers):
     global paused
-    if x < 238 and y < 169:
+    global selector
+    if x < 119 and y < 135:
         if not paused:
-            #pyglet.clock.unschedule(update)
             pauseButton.image = resources.resumeImage
             paused = True
         else:
-            #pyglet.clock.schedule_interval(update, 1/60.0)
             pauseButton.image = resources.pauseImage
             paused = False
+            for body in tempBodies:
+                heavenlyBodies.append(body)
+            sizeMenu.image = resources.noImage
+    elif x > 119 and x < 374 and y > 0 and y < 85:
+        if math.sqrt((x - 152)**2 + (y - 42)**2) < 5.5:
+            selector = 'moon'
+        if math.sqrt((x - 198)**2 + (y - 42)**2) < 17.5:
+            selector = 'planet'
+        if math.sqrt((x - 265)**2 + (y - 42)**2) < 27.4:
+            selector = 'star'
+        if math.sqrt((x - 308)**2 + (y - 42)**2) < 9.5:
+            selector = 'hole'
     else:
         MainWindow.set_mouse_cursor(cursorAlt)
-        newBody = planet.Planet(img=resources.bluePlanetImage, x=x, y=y, batch=mainBatch, mass=su)
-        newBody.scale = 0.1
+        if selector == 'planet':
+            newBody = planet.Planet(img=resources.planetImage, x=x, y=y, batch=mainBatch, mass=0.000003003*su)
+        elif selector == 'moon':
+            newBody = planet.Planet(img=resources.moonImage, x=x, y=y, batch=mainBatch, mass=0.0000000369397*su)
+        elif selector == 'star':
+            newBody = planet.Planet(img=resources.starImage, x=x, y=y, batch=mainBatch, mass=su)
+        else:
+            newBody = planet.Planet(img=resources.holeImage, x=x, y=y, batch=mainBatch, mass=su)
         heavenlyBodies.append(newBody)
+
 @MainWindow.event
 def on_mouse_release(x, y, button, modifiers):
     MainWindow.set_mouse_cursor(cursor)
-
 
 @MainWindow.event
 def on_draw():

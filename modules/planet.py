@@ -5,7 +5,7 @@ from modules import resources
 class Planet(pyglet.sprite.Sprite):
     def __init__(self, mass, vxi=0, vyi=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.speedUp = 20000
+        self.speedUp = 50000
         self.vx = vxi
         self.vy = vyi
         self.ax = 0
